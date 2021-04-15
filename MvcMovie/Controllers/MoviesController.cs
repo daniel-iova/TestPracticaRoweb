@@ -20,7 +20,7 @@ namespace MvcMovie.Controllers
         }
 
         // GET: Movies
-        public async Task<IActionResult> Index(string movieGenre, string searchString)
+        public async Task<IActionResult> Index(string movieGenre, string searchString, int? pageNumber)
         {
             // Use LINQ to get list of genres.
             IQueryable<string> genreQuery = from m in _context.Movie
@@ -28,31 +28,24 @@ namespace MvcMovie.Controllers
                                             select m.Genre;
 
             var movies = from m in _context.Movie
-                         select m;
+                         select new MovieWithReviews(m, (from r in _context.Review where r.MovieId.Equals(m.Id) select r).ToList());
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                movies = movies.Where(s => s.Title.Contains(searchString));
+                movies = movies.Where(s => s.MovieItem.Title.Contains(searchString));
             }
 
             if (!string.IsNullOrEmpty(movieGenre))
             {
-                movies = movies.Where(x => x.Genre == movieGenre);
+                movies = movies.Where(x => x.MovieItem.Genre == movieGenre);
             }
-
+            int pageSize = 4;
             var movieGenreVM = new MovieGenreViewModel()
             {
                 Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
-                Movies = await movies.ToListAsync()
+                Movies = await PaginatedList<MovieWithReviews>.CreateAsync(movies.AsNoTracking(), pageNumber ?? 1, pageSize)
             };
-
             return View(movieGenreVM);
-        }
-
-        [HttpPost]
-        public string Index(string searchString, bool notUsed)
-        {
-            return "From [HttpPost]Index: filter on " + searchString;
         }
 
         // GET: Movies/Details/5
@@ -70,7 +63,9 @@ namespace MvcMovie.Controllers
                 return NotFound();
             }
 
-            return View(movie);
+            return View(new MovieWithReviews(movie, (from r in _context.Review 
+                                                     where r.MovieId.Equals(movie.Id) 
+                                                     select r).ToList()));
         }
 
         // GET: Movies/Create
