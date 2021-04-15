@@ -12,7 +12,6 @@ namespace MvcMovie.Models
             MovieItem = movieItem;
             ReviewList = reviewList;
         }
-
         public Movie MovieItem { get; set; }
         public List<Review> ReviewList { get; set; }
     }

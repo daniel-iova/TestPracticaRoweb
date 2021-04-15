@@ -68,6 +68,30 @@ namespace MvcMovie.Controllers
                                                      select r).ToList()));
         }
 
+        public async Task<IActionResult> AddReview(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var movie = await _context.Movie.FindAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            _context.Review.Add(new Review()
+            {
+                Name = Request.Form["reviewName"],
+                WrittenReview = Request.Form["reviewText"],
+                ReviewDate = DateTime.Now,
+                MovieId = (int)id
+            });
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), "Movies", new { id = id });
+        }
+
+
         // GET: Movies/Create
         public IActionResult Create()
         {

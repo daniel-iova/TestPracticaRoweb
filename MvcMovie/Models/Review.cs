@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MvcMovie.Models
 {
@@ -12,6 +9,9 @@ namespace MvcMovie.Models
     {
         public int Id { get; set; }
         public int MovieId { get; set; }
+        // A drawback of my implementation is that
+        // validation must be performed on the text boxes' input
+        // and not on the model itself
         public string Name { get; set; }
         [Display(Name = "Review")]
         public string WrittenReview { get; set; }
